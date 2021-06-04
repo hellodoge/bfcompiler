@@ -3,7 +3,7 @@ use crate::{vm, util};
 #[derive(Debug, Clone)]
 pub enum Operand {
     PositionRegister,
-    PositionRegisterMemOffset(i32),
+    MemoryOffset(i32),
     Register(&'static str),
     ConstI32(i32),
     ConstU32(u32),
@@ -58,12 +58,12 @@ pub fn compile(instr: Vec<vm::Instruction>) -> Vec<Instruction> {
             vm::Instruction::Add(value, offset) => {
                 vec![Instruction::Add(
                     Operand::ConstU8(value),
-                    Operand::PositionRegisterMemOffset(offset as i32)
+                    Operand::MemoryOffset(offset as i32)
                 )]
             }
             vm::Instruction::Assign(value, offset) => {
                 vec![Instruction::Mov(
-                    Operand::PositionRegisterMemOffset(offset as i32),
+                    Operand::MemoryOffset(offset as i32),
                     Operand::ConstU8(value)
                 )]
             }
@@ -169,7 +169,7 @@ impl std::fmt::Display for Operand {
             Operand::Register(reg) => write!(f, "{}", *reg),
             Operand::ConstU8(op) => write!(f, "byte {}", *op),
             Operand::PositionRegister => write!(f, "{}", POSITION_REGISTER),
-            Operand::PositionRegisterMemOffset(offset) => {
+            Operand::MemoryOffset(offset) => {
                 if *offset < 0 {
                     write!(f, "[{} - {}]", POSITION_REGISTER, -*offset)
                 } else {
