@@ -134,7 +134,7 @@ pub fn generate_asm(program: Vec<Instruction>, out: &mut impl std::io::Write) ->
     write!(out, "section .text\n")?;
     write!(out, "_start:\n")?;
     for instr in program {
-        write!(out, "{}", instr)?;
+        write!(out, "{}\n", instr)?;
     }
     Ok(())
 }
