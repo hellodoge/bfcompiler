@@ -170,8 +170,10 @@ impl std::fmt::Display for Operand {
             Operand::MemoryOffset(offset) => {
                 if *offset < 0 {
                     write!(f, "[{} - {}]", POSITION_REGISTER, -*offset)
-                } else {
+                } else if *offset > 0 {
                     write!(f, "[{} + {}]", POSITION_REGISTER, *offset)
+                } else {
+                    write!(f, "[{}]", POSITION_REGISTER)
                 }
             }
         }
