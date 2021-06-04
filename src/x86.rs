@@ -125,3 +125,57 @@ pub fn compile(instr: Vec<vm::Instruction>) -> Vec<Instruction> {
     }
     return compiled;
 }
+
+const MEM_LABEL: &'static str = "mem";
+
+pub fn generate_asm(program: Vec<Instruction>, out: &mut impl std::io::Write) -> std::io::Result<()> {
+    write!(out, "global _start\n")?;
+    write!(out, "section .bss\n")?;
+    write!(out, "\t{} resb {}\n", MEM_LABEL, vm::MEMORY_SIZE)?;
+    write!(out, "section .text\n")?;
+    write!(out, "_start:\n")?;
+    for instr in program {
+        write!(out, "{}", instr)?;
+    }
+    Ok(())
+}
+
+impl std::fmt::Display for Instruction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Instruction::Add(sum, term) =>
+                write!(f, "\tadd\t{},\t{}", sum, term),
+            Instruction::Mov(to, from) =>
+                write!(f, "\tmov\t{},\t{}", to, from),
+            Instruction::Sub(dif, term) =>
+                write!(f, "\tsub\t{},\t{}", dif, term),
+            Instruction::Cmp(l, r) =>
+                write!(f, "\tcmp\t{},\t{}", l, r),
+            Instruction::Jif(instr, label) =>
+                write!(f, "\t{}\t{}", *instr, *label),
+            Instruction::Label(label) =>
+                write!(f, "{}", label),
+            Instruction::Int(int) =>
+                write!(f, "int {:x}", int)
+        }
+    }
+}
+
+impl std::fmt::Display for Operand {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Operand::ConstI32(op) => write!(f, "dword {}", *op),
+            Operand::ConstU32(op) => write!(f, "dword {}", *op),
+            Operand::Register(reg) => write!(f, "{}", *reg),
+            Operand::ConstU8(op) => write!(f, "byte {}", *op),
+            Operand::PositionRegister => write!(f, "{}", POSITION_REGISTER),
+            Operand::PositionRegisterMemOffset(offset) => {
+                if *offset < 0 {
+                    write!(f, "[{} - {}]", POSITION_REGISTER, -*offset)
+                } else {
+                    write!(f, "[{} + {}]", POSITION_REGISTER, *offset)
+                }
+            }
+        }
+    }
+}
