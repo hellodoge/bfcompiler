@@ -155,7 +155,7 @@ impl std::fmt::Display for Instruction {
             Instruction::Label(label) =>
                 write!(f, "{}", label),
             Instruction::Int(int) =>
-                write!(f, "int {:x}", int)
+                write!(f, "\tint 0x{:x}", int)
         }
     }
 }
