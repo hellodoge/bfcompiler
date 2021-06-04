@@ -2,7 +2,6 @@ use crate::{vm, util};
 
 #[derive(Debug, Clone)]
 pub enum Operand {
-    PositionRegister,
     MemoryOffset(i32),
     Register(&'static str),
     ConstI32(i32),
@@ -76,13 +75,13 @@ pub fn compile(instr: Vec<vm::Instruction>) -> Vec<Instruction> {
                 let closing = ".L_CLOSE_".to_owned() + &unique_id;
                 [
                     vec![
-                        Instruction::Cmp(Operand::PositionRegister, Operand::ConstU8(0)),
+                        Instruction::Cmp(POSITION_REGISTER, Operand::ConstU8(0)),
                         Instruction::Jif("jz", closing.clone()),
                         Instruction::Label(opening.clone())
                     ],
                     compile(instr),
                     vec![
-                        Instruction::Cmp(Operand::PositionRegister, Operand::ConstU8(0)),
+                        Instruction::Cmp(POSITION_REGISTER, Operand::ConstU8(0)),
                         Instruction::Jif("jnz", opening),
                         Instruction::Label(closing)
                     ]
@@ -168,7 +167,6 @@ impl std::fmt::Display for Operand {
             Operand::ConstU32(op) => write!(f, "dword {}", *op),
             Operand::Register(reg) => write!(f, "{}", *reg),
             Operand::ConstU8(op) => write!(f, "byte {}", *op),
-            Operand::PositionRegister => write!(f, "{}", POSITION_REGISTER),
             Operand::MemoryOffset(offset) => {
                 if *offset < 0 {
                     write!(f, "[{} - {}]", POSITION_REGISTER, -*offset)
