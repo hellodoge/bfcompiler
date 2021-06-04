@@ -32,7 +32,7 @@ pub enum Instruction {
     Int(u8)
 }
 
-const SYSTEM_CALL: Instruction = Instruction::Int(80);
+const SYSTEM_CALL: Instruction = Instruction::Int(0x80);
 
 pub fn compile(instr: Vec<vm::Instruction>) -> Vec<Instruction> {
 
