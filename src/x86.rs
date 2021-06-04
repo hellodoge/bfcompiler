@@ -99,22 +99,32 @@ pub fn compile(instr: Vec<vm::Instruction>) -> Vec<Instruction> {
                 ].concat()
             }
             vm::Instruction::Write(offset) => {
-                vec![
-                    Instruction::Mov(EAX, SYS_WRITE),
-                    Instruction::Mov(EBX, STDOUT),
-                    Instruction::Mov(ECX, Operand::ConstI32(1)),
-                    Instruction::Mov(EDX, POSITION_REGISTER),
-                    SYSTEM_CALL,
-                ]
+                [
+                    vec![
+                        Instruction::Mov(EAX, SYS_WRITE),
+                        Instruction::Mov(EBX, STDOUT),
+                        Instruction::Mov(ECX, Operand::ConstI32(1)),
+                        Instruction::Mov(EDX, POSITION_REGISTER),
+                    ],
+                    add_or_dec_instruction(EDX, offset),
+                    vec![
+                        SYSTEM_CALL,
+                    ]
+                ].concat()
             }
             vm::Instruction::Read(offset) => {
-                vec![
-                    Instruction::Mov(EAX, SYS_READ),
-                    Instruction::Mov(EBX, STDIN),
-                    Instruction::Mov(ECX, Operand::ConstI32(1)),
-                    Instruction::Mov(EDX, POSITION_REGISTER),
-                    SYSTEM_CALL,
-                ]
+                [
+                    vec![
+                        Instruction::Mov(EAX, SYS_READ),
+                        Instruction::Mov(EBX, STDIN),
+                        Instruction::Mov(ECX, Operand::ConstI32(1)),
+                        Instruction::Mov(EDX, POSITION_REGISTER),
+                    ],
+                    add_or_dec_instruction(EDX, offset),
+                    vec![
+                        SYSTEM_CALL,
+                    ]
+                ].concat()
             }
         }
     }
