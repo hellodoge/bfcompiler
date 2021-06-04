@@ -140,6 +140,9 @@ pub fn generate_asm(program: Vec<Instruction>, out: &mut impl std::io::Write) ->
     for instr in program {
         write!(out, "{}\n", instr)?;
     }
+    write!(out, "{}\n", Instruction::Mov(EAX, Operand::ConstI32(1)))?;
+    write!(out, "{}\n", Instruction::Mov(EBX, Operand::Pointer(Box::new(POSITION_REGISTER))))?;
+    write!(out, "{}\n", SYSTEM_CALL)?;
     Ok(())
 }
 
