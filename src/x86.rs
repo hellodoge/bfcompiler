@@ -136,6 +136,7 @@ pub fn generate_asm(program: Vec<Instruction>, out: &mut impl std::io::Write) ->
     write!(out, "\t{} resb {}\n", MEM_LABEL, vm::MEMORY_SIZE)?;
     write!(out, "section .text\n")?;
     write!(out, "_start:\n")?;
+    write!(out, "\tmov\t{},\t{}\n", POSITION_REGISTER, MEM_LABEL)?;
     for instr in program {
         write!(out, "{}\n", instr)?;
     }
