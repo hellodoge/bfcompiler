@@ -68,17 +68,7 @@ pub fn compile(instr: Vec<vm::Instruction>) -> Vec<Instruction> {
                 )]
             }
             vm::Instruction::Move(offset) => {
-                if offset < 0 {
-                    vec![Instruction::Sub(
-                        Operand::ConstU32(-offset as u32),
-                        Operand::PositionRegister
-                    )]
-                } else {
-                    vec![Instruction::Add(
-                        Operand::ConstU32(offset as u32),
-                        Operand::PositionRegister
-                    )]
-                }
+                add_or_dec_instruction(POSITION_REGISTER, offset)
             }
             vm::Instruction::Loop(instr) => {
                 let unique_id = util::get_unique();
