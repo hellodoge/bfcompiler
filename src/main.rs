@@ -4,6 +4,8 @@ mod vm;
 mod parser;
 mod optimizer;
 mod driver;
+mod x86;
+mod util;
 
 fn main() {
     let mut args = std::env::args();
