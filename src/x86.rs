@@ -4,6 +4,7 @@ use crate::{vm, util};
 pub enum Operand {
     MemoryOffset(i32),
     Register(&'static str),
+    Pointer(Box<Operand>),
     ConstI32(i32),
     ConstU32(u32),
     ConstU8(u8)
@@ -166,6 +167,7 @@ impl std::fmt::Display for Operand {
             Operand::ConstI32(op) => write!(f, "dword {}", *op),
             Operand::ConstU32(op) => write!(f, "dword {}", *op),
             Operand::Register(reg) => write!(f, "{}", *reg),
+            Operand::Pointer(op) => write!(f, "[{}]", op),
             Operand::ConstU8(op) => write!(f, "byte {}", *op),
             Operand::MemoryOffset(offset) => {
                 if *offset < 0 {
