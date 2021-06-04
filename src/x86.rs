@@ -76,13 +76,15 @@ pub fn compile(instr: Vec<vm::Instruction>) -> Vec<Instruction> {
                 let closing = ".L_CLOSE_".to_owned() + &unique_id;
                 [
                     vec![
-                        Instruction::Cmp(POSITION_REGISTER, Operand::ConstU8(0)),
+                        Instruction::Cmp(Operand::Pointer(Box::new(POSITION_REGISTER)),
+                                         Operand::ConstU8(0)),
                         Instruction::Jif("jz", closing.clone()),
                         Instruction::Label(opening.clone())
                     ],
                     compile(instr),
                     vec![
-                        Instruction::Cmp(POSITION_REGISTER, Operand::ConstU8(0)),
+                        Instruction::Cmp(Operand::Pointer(Box::new(POSITION_REGISTER)),
+                                         Operand::ConstU8(0)),
                         Instruction::Jif("jnz", opening),
                         Instruction::Label(closing)
                     ]
