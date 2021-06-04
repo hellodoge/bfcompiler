@@ -13,7 +13,7 @@ pub enum RuntimeError {
     OutOfMemoryBounds
 }
 
-const MEMORY_SIZE: usize = 30000;
+pub const MEMORY_SIZE: usize = 30000;
 
 pub struct VM {
     memory: [u8; MEMORY_SIZE],
