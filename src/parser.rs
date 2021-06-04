@@ -49,3 +49,12 @@ pub fn parse(source: &mut impl std::io::Read) -> Result<Vec<Instruction>, Parser
 
     return rec_parse(source, false);
 }
+
+impl std::fmt::Display for ParserError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        match self {
+            ParserError::UnexpectedBracket => write!(f, "Unexpected bracket"),
+            ParserError::IOError(e) => write!(f, "IO Error! {}", e)
+        }
+    }
+}
