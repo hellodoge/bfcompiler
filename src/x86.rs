@@ -38,6 +38,22 @@ const SYSTEM_CALL: Instruction = Instruction::Int(80);
 pub fn compile(instr: Vec<vm::Instruction>) -> Vec<Instruction> {
 
     fn compile_instr(instr: vm::Instruction) -> Vec<Instruction> {
+
+        fn add_or_dec_instruction(dst: Operand, offset: isize) -> Vec<Instruction> {
+            if offset < 0 {
+                return vec![Instruction::Sub(
+                    dst,
+                    Operand::ConstU32(-offset as u32),
+                )]
+            } else if offset > 0 {
+                return vec![Instruction::Add(
+                    dst,
+                    Operand::ConstU32(offset as u32),
+                )]
+            };
+            return Vec::new()
+        }
+
         match instr {
             vm::Instruction::Add(value, offset) => {
                 vec![Instruction::Add(
