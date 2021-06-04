@@ -21,6 +21,7 @@ const STDOUT: Operand = Operand::ConstI32(1);
 const SYS_READ: Operand = Operand::ConstI32(3);
 const SYS_WRITE: Operand = Operand::ConstI32(4);
 
+/// intel syntax order
 #[derive(Debug, Clone)]
 pub enum Instruction {
     Add(Operand, Operand),
