@@ -56,8 +56,8 @@ pub fn compile(instr: Vec<vm::Instruction>) -> Vec<Instruction> {
         match instr {
             vm::Instruction::Add(value, offset) => {
                 vec![Instruction::Add(
-                    Operand::ConstU8(value),
-                    Operand::MemoryOffset(offset as i32)
+                    Operand::MemoryOffset(offset as i32),
+                    Operand::ConstU8(value)
                 )]
             }
             vm::Instruction::Assign(value, offset) => {
