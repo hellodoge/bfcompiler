@@ -95,8 +95,8 @@ pub fn compile(instr: Vec<vm::Instruction>) -> Vec<Instruction> {
                     vec![
                         Instruction::Mov(EAX, SYS_WRITE),
                         Instruction::Mov(EBX, STDOUT),
-                        Instruction::Mov(ECX, Operand::ConstI32(1)),
-                        Instruction::Mov(EDX, POSITION_REGISTER),
+                        Instruction::Mov(ECX, POSITION_REGISTER),
+                        Instruction::Mov(EDX, Operand::ConstI32(1)),
                     ],
                     add_or_dec_instruction(EDX, offset),
                     vec![
@@ -109,8 +109,8 @@ pub fn compile(instr: Vec<vm::Instruction>) -> Vec<Instruction> {
                     vec![
                         Instruction::Mov(EAX, SYS_READ),
                         Instruction::Mov(EBX, STDIN),
-                        Instruction::Mov(ECX, Operand::ConstI32(1)),
-                        Instruction::Mov(EDX, POSITION_REGISTER),
+                        Instruction::Mov(ECX, POSITION_REGISTER),
+                        Instruction::Mov(EDX, Operand::ConstI32(1)),
                     ],
                     add_or_dec_instruction(EDX, offset),
                     vec![
