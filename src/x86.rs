@@ -153,7 +153,7 @@ impl std::fmt::Display for Instruction {
             Instruction::Jif(instr, label) =>
                 write!(f, "\t{}\t{}", *instr, *label),
             Instruction::Label(label) =>
-                write!(f, "{}", label),
+                write!(f, "{}:", label),
             Instruction::Int(int) =>
                 write!(f, "\tint 0x{:x}", int)
         }
