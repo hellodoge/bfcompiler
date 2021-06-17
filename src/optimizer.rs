@@ -86,6 +86,7 @@ fn optimize_loop(instructions: Vec<Instruction>) -> Instruction {
 fn optimize_instructions(code: &Vec<Instruction>) -> Vec<Instruction> {
     let mut optimized = Vec::new();
     let mut set = Vec::new();
+    let mut prev_state: Option<State> = None;
     for (i, instr) in code.iter().enumerate() {
         let mut not_part_of_set = false;
         match instr {
@@ -99,14 +100,31 @@ fn optimize_instructions(code: &Vec<Instruction>) -> Vec<Instruction> {
             let state = get_state(&set);
             optimized.extend(state.get_instructions());
             set.clear();
+            prev_state = Some(state);
         }
         if not_part_of_set {
-            optimized.push(match instr {
+            match instr {
                 Instruction::Loop(inner) => {
-                    optimize_loop(optimize_instructions(inner))
+                    if let Some(state) = &prev_state {
+                        match state.mem.get(&state.cursor_offset) {
+                            Some((value, state)) => {
+                                match *state {
+                                    MemoryCellState::Assigned if *value == 0 => continue,
+                                    _ => {}
+                                }
+                            }
+                            _ => {}
+                        }
+                    }
+                    if prev_state.is_none() {
+                        continue
+                    }
+                    optimized.push(
+                        optimize_loop(optimize_instructions(inner))
+                    )
                 }
-                _ => instr.clone()
-            })
+                _ => optimized.push(instr.clone())
+            }
         }
     }
 
