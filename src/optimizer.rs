@@ -18,8 +18,7 @@ enum MemoryCellState {
     Relative,
 }
 
-
-fn optimize_set(code: &Vec<Instruction>) -> Vec<Instruction> {
+fn get_state(code: &Vec<Instruction>) -> State {
     let mut state = State {
         mem: HashMap::default(),
         cursor_offset: 0,
@@ -30,7 +29,7 @@ fn optimize_set(code: &Vec<Instruction>) -> Vec<Instruction> {
             Instruction::Add(x, offset) => {
                 let (prev_value, cell_state) =
                     state.mem.get(&(state.cursor_offset + *offset))
-                    .or(Some(&(0u8, MemoryCellState::Relative))).unwrap().clone();
+                        .or(Some(&(0u8, MemoryCellState::Relative))).unwrap().clone();
                 let (sum, _) = x.overflowing_add(prev_value);
                 state.mem.insert(state.cursor_offset + *offset, (sum, cell_state));
             }
@@ -44,23 +43,29 @@ fn optimize_set(code: &Vec<Instruction>) -> Vec<Instruction> {
         }
     }
 
-    let mut optimized = Vec::new();
-    for (offset, (val, state)) in state.mem.iter() {
-        optimized.push(match state {
-            MemoryCellState::Relative if *val != 0 => {
-                Instruction::Add(*val, *offset)
-            }
-            MemoryCellState::Assigned => {
-                Instruction::Assign(*val, *offset)
-            }
-            _ => continue
-        })
-    }
-    if state.cursor_offset != 0 {
-        optimized.push(Instruction::Move(state.cursor_offset));
-    }
+    return state
+}
 
-    return optimized;
+impl State {
+    fn get_instructions(&self) -> Vec<Instruction> {
+        let mut optimized = Vec::new();
+        for (offset, (val, state)) in self.mem.iter() {
+            optimized.push(match state {
+                MemoryCellState::Relative if *val != 0 => {
+                    Instruction::Add(*val, *offset)
+                }
+                MemoryCellState::Assigned => {
+                    Instruction::Assign(*val, *offset)
+                }
+                _ => continue
+            })
+        }
+        if self.cursor_offset != 0 {
+            optimized.push(Instruction::Move(self.cursor_offset));
+        }
+
+        return optimized;
+    }
 }
 
 fn optimize_loop(instructions: Vec<Instruction>) -> Instruction {
@@ -81,6 +86,7 @@ fn optimize_loop(instructions: Vec<Instruction>) -> Instruction {
 fn optimize_instructions(code: &Vec<Instruction>) -> Vec<Instruction> {
     let mut optimized = Vec::new();
     let mut set = Vec::new();
+    let mut prev_state: Option<State> = None;
     for (i, instr) in code.iter().enumerate() {
         let mut not_part_of_set = false;
         match instr {
@@ -91,16 +97,34 @@ fn optimize_instructions(code: &Vec<Instruction>) -> Vec<Instruction> {
             _ => { not_part_of_set = true }
         }
         if !set.is_empty() {
-            optimized.extend(optimize_set(&set));
+            let state = get_state(&set);
+            optimized.extend(state.get_instructions());
             set.clear();
+            prev_state = Some(state);
         }
         if not_part_of_set {
-            optimized.push(match instr {
+            match instr {
                 Instruction::Loop(inner) => {
-                    optimize_loop(optimize_instructions(inner))
+                    if let Some(state) = &prev_state {
+                        match state.mem.get(&state.cursor_offset) {
+                            Some((value, state)) => {
+                                match *state {
+                                    MemoryCellState::Assigned if *value == 0 => continue,
+                                    _ => {}
+                                }
+                            }
+                            _ => {}
+                        }
+                    }
+                    if prev_state.is_none() {
+                        continue
+                    }
+                    optimized.push(
+                        optimize_loop(optimize_instructions(inner))
+                    )
                 }
-                _ => instr.clone()
-            })
+                _ => optimized.push(instr.clone())
+            }
         }
     }
 
