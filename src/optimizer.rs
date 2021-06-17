@@ -46,27 +46,26 @@ fn get_state(code: &Vec<Instruction>) -> State {
     return state
 }
 
-fn optimize_set(code: &Vec<Instruction>) -> Vec<Instruction> {
+impl State {
+    fn get_instructions(&self) -> Vec<Instruction> {
+        let mut optimized = Vec::new();
+        for (offset, (val, state)) in self.mem.iter() {
+            optimized.push(match state {
+                MemoryCellState::Relative if *val != 0 => {
+                    Instruction::Add(*val, *offset)
+                }
+                MemoryCellState::Assigned => {
+                    Instruction::Assign(*val, *offset)
+                }
+                _ => continue
+            })
+        }
+        if self.cursor_offset != 0 {
+            optimized.push(Instruction::Move(self.cursor_offset));
+        }
 
-    let state = get_state(code);
-
-    let mut optimized = Vec::new();
-    for (offset, (val, state)) in state.mem.iter() {
-        optimized.push(match state {
-            MemoryCellState::Relative if *val != 0 => {
-                Instruction::Add(*val, *offset)
-            }
-            MemoryCellState::Assigned => {
-                Instruction::Assign(*val, *offset)
-            }
-            _ => continue
-        })
+        return optimized;
     }
-    if state.cursor_offset != 0 {
-        optimized.push(Instruction::Move(state.cursor_offset));
-    }
-
-    return optimized;
 }
 
 fn optimize_loop(instructions: Vec<Instruction>) -> Instruction {
@@ -97,7 +96,8 @@ fn optimize_instructions(code: &Vec<Instruction>) -> Vec<Instruction> {
             _ => { not_part_of_set = true }
         }
         if !set.is_empty() {
-            optimized.extend(optimize_set(&set));
+            let state = get_state(&set);
+            optimized.extend(state.get_instructions());
             set.clear();
         }
         if not_part_of_set {
