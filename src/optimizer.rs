@@ -18,8 +18,7 @@ enum MemoryCellState {
     Relative,
 }
 
-
-fn optimize_set(code: &Vec<Instruction>) -> Vec<Instruction> {
+fn get_state(code: &Vec<Instruction>) -> State {
     let mut state = State {
         mem: HashMap::default(),
         cursor_offset: 0,
@@ -30,7 +29,7 @@ fn optimize_set(code: &Vec<Instruction>) -> Vec<Instruction> {
             Instruction::Add(x, offset) => {
                 let (prev_value, cell_state) =
                     state.mem.get(&(state.cursor_offset + *offset))
-                    .or(Some(&(0u8, MemoryCellState::Relative))).unwrap().clone();
+                        .or(Some(&(0u8, MemoryCellState::Relative))).unwrap().clone();
                 let (sum, _) = x.overflowing_add(prev_value);
                 state.mem.insert(state.cursor_offset + *offset, (sum, cell_state));
             }
@@ -43,6 +42,13 @@ fn optimize_set(code: &Vec<Instruction>) -> Vec<Instruction> {
             _ => unreachable!()
         }
     }
+
+    return state
+}
+
+fn optimize_set(code: &Vec<Instruction>) -> Vec<Instruction> {
+
+    let state = get_state(code);
 
     let mut optimized = Vec::new();
     for (offset, (val, state)) in state.mem.iter() {
